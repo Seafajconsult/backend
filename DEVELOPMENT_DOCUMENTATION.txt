@@ -1,0 +1,644 @@
+===============================================================================
+                    SEA-FAJ CONSULTING BACKEND
+                  DEVELOPMENT DOCUMENTATION
+===============================================================================
+
+TABLE OF CONTENTS
+----------------
+1. Project Overview
+2. Development Environment Setup
+3. Architecture
+4. Database Schema
+5. API Endpoints
+6. Authentication Flow
+7. Role-Based Access Control
+8. Messaging System
+9. Notification System
+10. Testing Guide
+11. Deployment Guide
+12. Troubleshooting
+
+===============================================================================
+1. PROJECT OVERVIEW
+===============================================================================
+
+The SEA-FAJ Consulting Backend is a NestJS application that provides APIs for
+managing student applications, employer interactions, document verification,
+payments, and administrative functions. The system is designed with a role-based
+access control system to ensure secure and appropriate access to resources.
+
+Key Features:
+- Role-based access control (Student, Employer, Admin, Super Admin)
+- Document management and verification
+- Application processing
+- Payment integration
+- Messaging system
+- Notification system
+- Admin dashboard
+- Super admin controls
+
+===============================================================================
+2. DEVELOPMENT ENVIRONMENT SETUP
+===============================================================================
+
+Prerequisites:
+- Node.js (v14 or higher)
+- MongoDB (local or Atlas)
+- Cloudinary account
+- SMTP server access
+
+Installation Steps:
+1. Clone the repository:
+   ```
+   git clone https://github.com/your-username/sea-faj-backend.git
+   cd sea-faj-backend
+   ```
+
+2. Install dependencies:
+   ```
+   npm install
+   ```
+
+3. Create a .env file with the required environment variables (see README.md)
+
+4. Start the development server:
+   ```
+   npm run start:dev
+   ```
+
+5. Seed the database with initial data:
+   ```
+   npm run seed:super-admin
+   ```
+
+6. Access the API documentation:
+   ```
+   http://localhost:5001/api/docs
+   ```
+
+===============================================================================
+3. ARCHITECTURE
+===============================================================================
+
+The application follows the NestJS modular architecture:
+
+- Modules: Encapsulate related functionality
+- Controllers: Handle HTTP requests and define routes
+- Services: Implement business logic
+- DTOs: Define data transfer objects for validation
+- Schemas: Define MongoDB document structures
+- Guards: Protect routes based on authentication and authorization
+- Interceptors: Transform the response data
+- Filters: Handle exceptions
+- Pipes: Transform and validate input data
+
+Key Modules:
+- AppModule: Root module
+- AuthModule: Authentication and authorization
+- UserModule: User management
+- DocumentModule: Document upload and verification
+- ApplicationModule: Application submission and processing
+- PaymentModule: Payment processing and tracking
+- MessageModule: Communication between users
+- NotificationModule: System notifications
+- AdminModule: Administrative functions
+- SuperAdminModule: System-wide management
+
+===============================================================================
+4. DATABASE SCHEMA
+===============================================================================
+
+The application uses MongoDB with Mongoose for data storage. Key schemas include:
+
+User:
+- userId: String (unique identifier)
+- email: String
+- password: String (hashed)
+- role: Enum (STUDENT, EMPLOYER, ADMIN, SUPER_ADMIN)
+- firstName: String
+- lastName: String
+- isEmailVerified: Boolean
+- status: Enum (ACTIVE, INACTIVE, SUSPENDED)
+- profile: Object (role-specific profile data)
+- createdAt: Date
+- updatedAt: Date
+
+Document:
+- user: ObjectId (reference to User)
+- title: String
+- description: String
+- fileUrl: String
+- cloudinaryId: String
+- fileType: String
+- status: Enum (PENDING, APPROVED, REJECTED)
+- rejectionReason: String
+- createdAt: Date
+- updatedAt: Date
+
+Application:
+- student: ObjectId (reference to User)
+- employer: ObjectId (reference to User)
+- position: String
+- description: String
+- status: Enum (DRAFT, SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED)
+- documents: Array of ObjectId (references to Document)
+- feedback: String
+- createdAt: Date
+- updatedAt: Date
+
+Payment:
+- user: ObjectId (reference to User)
+- amount: Number
+- currency: String
+- status: Enum (PENDING, COMPLETED, FAILED, REFUNDED)
+- paymentMethod: String
+- metadata: Object
+- createdAt: Date
+- updatedAt: Date
+
+Conversation:
+- participants: Array of ObjectId (references to User)
+- type: Enum (STUDENT_ADVISOR, STUDENT_EMPLOYER, STUDENT_ADMIN, EMPLOYER_ADMIN, SUPPORT)
+- isActive: Boolean
+- lastMessageAt: Date
+- metadata: Object
+- createdAt: Date
+- updatedAt: Date
+
+Message:
+- sender: ObjectId (reference to User)
+- conversation: ObjectId (reference to Conversation)
+- content: String
+- type: Enum (TEXT, SYSTEM, NOTIFICATION, FILE)
+- status: Enum (SENT, DELIVERED, READ)
+- readBy: Array of ObjectId (references to User)
+- metadata: Object
+- createdAt: Date
+- updatedAt: Date
+
+Notification:
+- userId: String
+- title: String
+- message: String
+- type: Enum (SYSTEM, APPLICATION, DOCUMENT, PAYMENT, MESSAGE)
+- isRead: Boolean
+- data: Object
+- link: String
+- createdAt: Date
+- updatedAt: Date
+
+===============================================================================
+5. API ENDPOINTS
+===============================================================================
+
+The API is organized into role-based endpoints. Below is a summary of the main
+endpoints. For detailed documentation, refer to the Swagger UI at /api/docs.
+
+Testing the API Endpoints:
+-------------------------
+You can test the API endpoints using the Swagger UI, Postman, or curl commands.
+
+Using Swagger UI:
+1. Start the server: `npm start`
+2. Open your browser and navigate to: http://localhost:5001/api/docs
+3. Use the interactive UI to test endpoints
+
+Using Postman:
+1. Import the Postman collection (if available)
+2. Set up environment variables for base URL and tokens
+3. Use the collection to test endpoints
+
+Authentication for Testing:
+--------------------------
+1. Register a user or use seeded accounts
+   - Super Admin: super.admin@sea-faj.com / SuperAdminPassword123!
+   - Admin: admin@sea-faj.com / AdminPassword123!
+
+2. Login to get access token:
+   ```
+   POST /api/auth/login
+   {
+     "email": "your-email@example.com",
+     "password": "your-password"
+   }
+   ```
+
+3. Use the token in the Authorization header:
+   ```
+   Authorization: Bearer YOUR_ACCESS_TOKEN
+   ```
+
+Authentication Endpoints:
+- POST /api/auth/register - Register a new user
+- POST /api/auth/verify-otp - Verify email with OTP
+- POST /api/auth/login - Login and get tokens
+- POST /api/auth/refresh - Refresh access token
+- POST /api/auth/admin/invite - Invite a new admin (admin only)
+
+Student Endpoints:
+- POST /api/student/auth/register - Register as a student
+- POST /api/student/auth/verify-otp - Verify student email
+- POST /api/student/auth/login - Student login
+- POST /api/student/auth/refresh - Refresh student token
+- POST /api/student/documents/upload - Upload a document
+- GET /api/student/documents - Get student documents
+- POST /api/student/messages/admin - Message an admin
+- GET /api/student/messages/admin - Get admin conversation
+
+Employer Endpoints:
+- POST /api/employer/auth/register - Register as an employer
+- POST /api/employer/auth/verify-otp - Verify employer email
+- POST /api/employer/auth/login - Employer login
+- POST /api/employer/auth/refresh - Refresh employer token
+- GET /api/employer/applications - Get employer applications
+- GET /api/employer/applications/:id - Get application details
+- GET /api/employer/status - Get employer status
+- POST /api/employer/messages/admin - Message an admin
+- GET /api/employer/messages/admin - Get admin conversation
+
+Admin Endpoints:
+- POST /api/admin/auth/login - Admin login
+- GET /api/admin/users - Get all users
+- GET /api/admin/users/:id - Get user details
+- GET /api/admin/documents - Get all documents
+- GET /api/admin/documents/:id - Get document details
+- POST /api/admin/documents/:id/status - Update document status
+- GET /api/admin/applications - Get all applications
+- GET /api/admin/applications/:id - Get application details
+- GET /api/admin/payments - Get all payments
+- GET /api/admin/payments/:id - Get payment details
+- GET /api/admin/messages/student - Get student conversations
+- GET /api/admin/messages/employer - Get employer conversations
+- GET /api/admin/messages/conversations/:id - Get conversation details
+- POST /api/admin/messages/reply/:conversationId - Reply to a conversation
+
+Super Admin Endpoints:
+- POST /api/super-admin/auth/login - Super admin login
+- POST /api/super-admin/admins/invite - Invite a new admin
+- GET /api/super-admin/admins - Get all admins
+- GET /api/super-admin/admins/:id - Get admin details
+- DELETE /api/super-admin/admins/:id - Delete an admin
+- GET /api/super-admin/system/stats - Get system statistics
+- GET /api/super-admin/messages/all - Get all conversations
+- GET /api/super-admin/messages/student-admin - Get student-admin conversations
+- GET /api/super-admin/messages/employer-admin - Get employer-admin conversations
+- GET /api/super-admin/messages/conversations/:id - Get conversation details
+- GET /api/super-admin/notifications - Get all notifications
+- GET /api/super-admin/notifications/unread/count - Get unread notification count
+- POST /api/super-admin/notifications/:id/read - Mark notification as read
+- POST /api/super-admin/notifications/read-all - Mark all notifications as read
+
+Document Endpoints:
+- POST /api/documents/upload - Upload a document
+- GET /api/documents - Get all documents
+- GET /api/documents/user/:userId - Get user documents
+- POST /api/documents/:id/status - Update document status
+- DELETE /api/documents/:id - Delete a document
+
+Application Endpoints:
+- GET /api/applications - Get all applications
+- GET /api/applications/my-applications - Get user applications
+- GET /api/applications/:id - Get application details
+- POST /api/applications - Create a new application
+- PUT /api/applications/:id - Update an application
+- POST /api/applications/:id/documents/:documentId - Add document to application
+- DELETE /api/applications/:id - Delete an application
+
+Payment Endpoints:
+- POST /api/payments - Create a payment
+- GET /api/payments/user/:userId - Get user payments
+- POST /api/payments/:id/refund - Refund a payment
+
+Message Endpoints:
+- GET /api/messages/conversations - Get user conversations
+- GET /api/messages/conversations/:id - Get conversation details
+- GET /api/messages/conversations/:id/messages - Get conversation messages
+- POST /api/messages/conversations - Create a new conversation
+- POST /api/messages - Send a message
+- POST /api/messages/messages/:id/read - Mark message as read
+- POST /api/messages/conversations/:id/deactivate - Deactivate a conversation
+
+Notification Endpoints:
+- GET /api/notifications - Get user notifications
+- GET /api/notifications/unread/count - Get unread notification count
+- POST /api/notifications/:id/read - Mark notification as read
+- POST /api/notifications/read-all - Mark all notifications as read
+- DELETE /api/notifications/:id - Delete a notification
+
+===============================================================================
+6. AUTHENTICATION FLOW
+===============================================================================
+
+The authentication flow is as follows:
+
+1. Registration:
+   - User submits registration data (email, password, etc.)
+   - System creates a new user with unverified email
+   - System generates and sends OTP to user's email
+   - Super admins receive notification about new user registration
+
+2. Email Verification:
+   - User submits OTP received via email
+   - System verifies OTP and marks email as verified
+   - User can now log in
+
+3. Login:
+   - User submits email and password
+   - System validates credentials
+   - System generates access token (15 min expiry) and refresh token (7 days expiry)
+   - Tokens are returned to the user
+
+4. Accessing Protected Resources:
+   - User includes access token in Authorization header
+   - System validates token and checks user role
+   - If valid, the request is processed
+   - If invalid, 401 Unauthorized response is returned
+
+5. Token Refresh:
+   - When access token expires, user sends refresh token
+   - System validates refresh token
+   - System generates new access token
+   - New access token is returned to the user
+
+6. Admin Invitation:
+   - Admin/Super Admin invites a new admin via email
+   - System creates admin account with temporary password
+   - Admin receives email with login instructions
+   - Admin logs in and changes password
+
+===============================================================================
+7. ROLE-BASED ACCESS CONTROL
+===============================================================================
+
+The system implements role-based access control (RBAC) to ensure that users can
+only access resources appropriate to their role. The roles are:
+
+1. Student:
+   - Can register and manage their account
+   - Can upload and view their documents
+   - Can submit and track applications
+   - Can make payments
+   - Can message admins for support
+
+2. Employer:
+   - Can register and manage their account
+   - Can view applications submitted to them
+   - Can message admins for support
+
+3. Admin:
+   - Can view and manage users
+   - Can view and verify documents
+   - Can view and process applications
+   - Can view payments
+   - Can respond to messages from students and employers
+
+4. Super Admin:
+   - Has all admin permissions
+   - Can invite and manage admins
+   - Can view system statistics
+   - Can view all conversations
+   - Can receive notifications about new user registrations
+
+Role-based guards are implemented using NestJS guards and custom decorators.
+The @Roles() decorator is used to specify which roles can access a particular
+endpoint, and the RolesGuard checks if the user has the required role.
+
+===============================================================================
+8. MESSAGING SYSTEM
+===============================================================================
+
+The messaging system allows communication between users and administrators.
+Key features include:
+
+1. Conversation Types:
+   - STUDENT_ADMIN: Between a student and an admin
+   - EMPLOYER_ADMIN: Between an employer and an admin
+   - STUDENT_EMPLOYER: Between a student and an employer
+   - STUDENT_ADVISOR: Between a student and an advisor
+   - SUPPORT: General support conversations
+
+2. Message Types:
+   - TEXT: Regular text messages
+   - SYSTEM: System-generated messages
+   - NOTIFICATION: Notification messages
+   - FILE: File attachments
+
+3. Message Status:
+   - SENT: Message has been sent
+   - DELIVERED: Message has been delivered
+   - READ: Message has been read
+
+4. Real-time Communication:
+   - WebSockets are used for real-time messaging
+   - Users receive messages instantly
+   - Read receipts are supported
+
+5. Conversation Management:
+   - Create new conversations
+   - View conversation history
+   - Mark messages as read
+   - Deactivate conversations
+
+Testing the Messaging System:
+----------------------------
+1. Register two users (e.g., a student and an admin)
+2. Student initiates a conversation with admin:
+   ```
+   POST /api/student/messages/admin
+   {
+     "content": "Hello, I need help with my application."
+   }
+   ```
+3. Admin views student conversations:
+   ```
+   GET /api/admin/messages/student
+   ```
+4. Admin replies to the conversation:
+   ```
+   POST /api/admin/messages/reply/:conversationId
+   {
+     "content": "How can I help you with your application?"
+   }
+   ```
+5. Student views admin conversation:
+   ```
+   GET /api/student/messages/admin
+   ```
+
+===============================================================================
+9. NOTIFICATION SYSTEM
+===============================================================================
+
+The notification system keeps users informed about important events.
+Key features include:
+
+1. Notification Types:
+   - SYSTEM: System-generated notifications
+   - APPLICATION: Application-related notifications
+   - DOCUMENT: Document-related notifications
+   - PAYMENT: Payment-related notifications
+   - MESSAGE: Message-related notifications
+
+2. Notification Management:
+   - View all notifications
+   - Get unread notification count
+   - Mark notifications as read
+   - Delete notifications
+
+3. Real-time Notifications:
+   - WebSockets are used for real-time notifications
+   - Users receive notifications instantly
+
+4. Super Admin Notifications:
+   - Super admins receive notifications about new user registrations
+   - Super admins can view all notifications
+
+Testing the Notification System:
+------------------------------
+1. Register a new user (this will trigger a notification to super admins)
+2. Super admin views notifications:
+   ```
+   GET /api/super-admin/notifications
+   ```
+3. Super admin marks notification as read:
+   ```
+   POST /api/super-admin/notifications/:id/read
+   ```
+4. Super admin gets unread notification count:
+   ```
+   GET /api/super-admin/notifications/unread/count
+   ```
+
+===============================================================================
+10. TESTING GUIDE
+===============================================================================
+
+The application includes unit tests, integration tests, and end-to-end tests.
+
+Running Tests:
+------------
+1. Run unit tests:
+   ```
+   npm run test
+   ```
+
+2. Run end-to-end tests:
+   ```
+   npm run test:e2e
+   ```
+
+3. Run tests with coverage:
+   ```
+   npm run test:cov
+   ```
+
+Writing Tests:
+------------
+1. Unit Tests:
+   - Test individual functions and methods
+   - Mock dependencies
+   - Focus on business logic
+
+2. Integration Tests:
+   - Test interactions between modules
+   - Use in-memory MongoDB for database tests
+   - Test API endpoints
+
+3. End-to-End Tests:
+   - Test complete user flows
+   - Use supertest for HTTP requests
+   - Test authentication and authorization
+
+===============================================================================
+11. DEPLOYMENT GUIDE
+===============================================================================
+
+Deploying to Production:
+----------------------
+1. Build the application:
+   ```
+   npm run build
+   ```
+
+2. Set production environment variables
+
+3. Start the production server:
+   ```
+   npm run start:prod
+   ```
+
+Deployment Options:
+-----------------
+1. Traditional Server:
+   - Install Node.js and MongoDB
+   - Set up Nginx as a reverse proxy
+   - Use PM2 for process management
+
+2. Docker:
+   - Build Docker image
+   - Use Docker Compose for multi-container setup
+   - Deploy to Docker-compatible hosting
+
+3. Cloud Platforms:
+   - AWS Elastic Beanstalk
+   - Google App Engine
+   - Heroku
+   - Digital Ocean App Platform
+
+CI/CD Pipeline:
+-------------
+1. Set up GitHub Actions or similar CI/CD tool
+2. Run tests on each commit
+3. Deploy automatically on successful merge to main branch
+
+===============================================================================
+12. TROUBLESHOOTING
+===============================================================================
+
+Common Issues and Solutions:
+--------------------------
+
+1. Authentication Issues:
+   - Check if JWT_SECRET is properly set
+   - Verify token expiration
+   - Ensure user has the correct role
+
+2. Database Connection Issues:
+   - Check MongoDB connection string
+   - Verify network connectivity
+   - Check MongoDB user permissions
+
+3. File Upload Issues:
+   - Verify Cloudinary credentials
+   - Check file size limits
+   - Ensure proper file types
+
+4. Email Sending Issues:
+   - Check SMTP settings
+   - Verify email templates
+   - Check spam filters
+
+Debugging:
+---------
+1. Enable debug logs:
+   ```
+   LOG_LEVEL=debug npm run start:dev
+   ```
+
+2. Use NestJS logger:
+   ```typescript
+   private logger = new Logger('YourService');
+   this.logger.debug('Debug message');
+   this.logger.error('Error message', error.stack);
+   ```
+
+3. Use browser developer tools for frontend issues
+
+4. Check application logs for errors
+
+Getting Help:
+-----------
+1. Check the documentation
+2. Search for similar issues in the issue tracker
+3. Contact the development team
+4. Refer to NestJS documentation for framework-specific issues

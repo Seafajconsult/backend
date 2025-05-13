@@ -150,6 +150,24 @@ The API uses JWT (JSON Web Tokens) for authentication. To access protected endpo
 
 Tokens expire after 15 minutes. Use the refresh token endpoint (`/api/auth/refresh`) to obtain a new access token.
 
+### Default Admin Credentials
+
+The system is seeded with the following admin accounts:
+
+- **Super Admin**:
+  - Email: super.admin@sea-faj.com
+  - Password: SuperAdminPassword123!
+
+- **Admin**:
+  - Email: admin@sea-faj.com
+  - Password: AdminPassword123!
+
+### Password Recovery
+
+The system provides endpoints for password recovery:
+- Request password reset: `/api/auth/forgot-password`
+- Reset password with token: `/api/auth/reset-password`
+
 ## Modules
 
 The backend is organized into the following modules:

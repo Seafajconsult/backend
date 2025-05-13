@@ -232,53 +232,95 @@ Authentication Endpoints:
 - POST /api/auth/register - Register a new user
 - POST /api/auth/verify-otp - Verify email with OTP
 - POST /api/auth/login - Login and get tokens
+- POST /api/auth/logout - Logout and invalidate tokens
 - POST /api/auth/refresh - Refresh access token
+- POST /api/auth/forgot-password - Request password reset
+- POST /api/auth/reset-password - Reset password with token
 - POST /api/auth/admin/invite - Invite a new admin (admin only)
+
+Default Admin Credentials:
+- Super Admin: super.admin@sea-faj.com / SuperAdminPassword123!
+- Admin: admin@sea-faj.com / AdminPassword123!
 
 Student Endpoints:
 - POST /api/student/auth/register - Register as a student
 - POST /api/student/auth/verify-otp - Verify student email
 - POST /api/student/auth/login - Student login
+- POST /api/student/auth/logout - Student logout
 - POST /api/student/auth/refresh - Refresh student token
+- POST /api/student/auth/forgot-password - Request password reset
+- POST /api/student/auth/reset-password - Reset password with token
 - POST /api/student/documents/upload - Upload a document
 - GET /api/student/documents - Get student documents
 - POST /api/student/messages/admin - Message an admin
 - GET /api/student/messages/admin - Get admin conversation
+- GET /api/student/admission/status - Get admission status
+- PUT /api/student/admission/status - Update admission status
+- POST /api/student/payments/initiate - Initiate a payment
+- GET /api/student/payments - Get payment history
+- GET /api/student/payments/:id - Get payment details
+- POST /api/student/payments/verify - Verify payment
 
 Employer Endpoints:
 - POST /api/employer/auth/register - Register as an employer
 - POST /api/employer/auth/verify-otp - Verify employer email
 - POST /api/employer/auth/login - Employer login
+- POST /api/employer/auth/logout - Employer logout
 - POST /api/employer/auth/refresh - Refresh employer token
+- POST /api/employer/auth/forgot-password - Request password reset
+- POST /api/employer/auth/reset-password - Reset password with token
 - GET /api/employer/applications - Get employer applications
 - GET /api/employer/applications/:id - Get application details
 - GET /api/employer/status - Get employer status
 - POST /api/employer/messages/admin - Message an admin
 - GET /api/employer/messages/admin - Get admin conversation
+- POST /api/employer/jobs - Create a new job posting
+- GET /api/employer/jobs - Get employer job postings
+- PUT /api/employer/jobs/:id - Update a job posting
+- DELETE /api/employer/jobs/:id - Delete a job posting
+- POST /api/employer/payments/initiate - Initiate a payment
+- GET /api/employer/payments - Get payment history
+- GET /api/employer/payments/:id - Get payment details
+- POST /api/employer/payments/verify - Verify payment
 
 Admin Endpoints:
 - POST /api/admin/auth/login - Admin login
+- POST /api/admin/auth/logout - Admin logout
+- POST /api/admin/auth/refresh - Refresh admin token
+- POST /api/admin/auth/forgot-password - Request password reset
+- POST /api/admin/auth/reset-password - Reset password with token
 - GET /api/admin/users - Get all users
 - GET /api/admin/users/:id - Get user details
+- PUT /api/admin/users/:id/status - Update user status
 - GET /api/admin/documents - Get all documents
 - GET /api/admin/documents/:id - Get document details
 - POST /api/admin/documents/:id/status - Update document status
 - GET /api/admin/applications - Get all applications
 - GET /api/admin/applications/:id - Get application details
+- PUT /api/admin/applications/:id/status - Update application status
 - GET /api/admin/payments - Get all payments
 - GET /api/admin/payments/:id - Get payment details
+- POST /api/admin/payments/:id/refund - Process payment refund
 - GET /api/admin/messages/student - Get student conversations
 - GET /api/admin/messages/employer - Get employer conversations
 - GET /api/admin/messages/conversations/:id - Get conversation details
 - POST /api/admin/messages/reply/:conversationId - Reply to a conversation
+- GET /api/admin/admission/applications - Get all admission applications
+- PUT /api/admin/admission/applications/:id/status - Update admission status
 
 Super Admin Endpoints:
 - POST /api/super-admin/auth/login - Super admin login
+- POST /api/super-admin/auth/logout - Super admin logout
+- POST /api/super-admin/auth/refresh - Refresh super admin token
+- POST /api/super-admin/auth/forgot-password - Request password reset
+- POST /api/super-admin/auth/reset-password - Reset password with token
 - POST /api/super-admin/admins/invite - Invite a new admin
 - GET /api/super-admin/admins - Get all admins
 - GET /api/super-admin/admins/:id - Get admin details
+- PUT /api/super-admin/admins/:id/status - Update admin status
 - DELETE /api/super-admin/admins/:id - Delete an admin
 - GET /api/super-admin/system/stats - Get system statistics
+- GET /api/super-admin/system/logs - Get system logs
 - GET /api/super-admin/messages/all - Get all conversations
 - GET /api/super-admin/messages/student-admin - Get student-admin conversations
 - GET /api/super-admin/messages/employer-admin - Get employer-admin conversations
@@ -287,6 +329,8 @@ Super Admin Endpoints:
 - GET /api/super-admin/notifications/unread/count - Get unread notification count
 - POST /api/super-admin/notifications/:id/read - Mark notification as read
 - POST /api/super-admin/notifications/read-all - Mark all notifications as read
+- GET /api/super-admin/payments/stats - Get payment statistics
+- GET /api/super-admin/admission/stats - Get admission statistics
 
 Document Endpoints:
 - POST /api/documents/upload - Upload a document

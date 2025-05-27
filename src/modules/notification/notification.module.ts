@@ -8,6 +8,7 @@ import { NotificationController } from "./notification.controller";
 import { NotificationGateway } from "./notification.gateway";
 import { EmailService } from "../email/email.service";
 import { UserModule } from "../user/user.module";
+import { SMSModule } from "../sms/sms.module";
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { UserModule } from "../user/user.module";
       }),
     }),
     UserModule,
+    SMSModule,
   ],
   providers: [NotificationService, NotificationGateway, EmailService],
   controllers: [NotificationController],

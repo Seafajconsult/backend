@@ -39,19 +39,15 @@ __decorate([
     (0, swagger_1.ApiProperty)({
         description: "Currency code",
         example: "NGN",
-        required: false,
     }),
-    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreatePaymentDto.prototype, "currency", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: "Description of the payment",
-        example: "Application fee for university admission",
-        required: false,
+        example: "Application fee for University of Oxford",
     }),
-    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreatePaymentDto.prototype, "description", void 0);
@@ -65,4 +61,37 @@ __decorate([
     (0, class_validator_1.IsMongoId)(),
     __metadata("design:type", String)
 ], CreatePaymentDto.prototype, "applicationId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: "Payment method",
+        example: "card",
+        enum: ["card", "bank_transfer", "ussd"],
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePaymentDto.prototype, "paymentMethod", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: "Client payment reference",
+        example: "REF123456",
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePaymentDto.prototype, "clientReference", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: "Additional payment metadata",
+        example: {
+            customerEmail: "student@example.com",
+            customerPhone: "+2341234567890"
+        },
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], CreatePaymentDto.prototype, "metadata", void 0);
 //# sourceMappingURL=create-payment.dto.js.map

@@ -74,4 +74,56 @@ export class AnalyticsController {
   ) {
     return this.analyticsService.getMetricTrends(metric, period);
   }
+
+  @Get("dashboard/comprehensive")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiOperation({ summary: "Get comprehensive dashboard data (Super Admin only)" })
+  async getComprehensiveDashboard() {
+    return this.analyticsService.getComprehensiveDashboard();
+  }
+
+  @Get("dashboard/jobs")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({ summary: "Get job metrics dashboard" })
+  async getJobMetrics(
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string
+  ) {
+    return this.analyticsService.getJobMetrics(startDate, endDate);
+  }
+
+  @Get("dashboard/recruitment")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({ summary: "Get recruitment metrics dashboard" })
+  async getRecruitmentMetrics(
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string
+  ) {
+    return this.analyticsService.getRecruitmentMetrics(startDate, endDate);
+  }
+
+  @Get("dashboard/invoices")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({ summary: "Get invoice metrics dashboard" })
+  async getInvoiceMetrics(
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string
+  ) {
+    return this.analyticsService.getInvoiceMetrics(startDate, endDate);
+  }
+
+  @Get("dashboard/referrals")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({ summary: "Get referral metrics dashboard" })
+  async getReferralMetrics(
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string
+  ) {
+    return this.analyticsService.getReferralMetrics(startDate, endDate);
+  }
 }

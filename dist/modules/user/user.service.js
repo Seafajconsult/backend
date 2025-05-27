@@ -36,9 +36,38 @@ let UserService = class UserService {
     async findById(userId) {
         return this.userModel.findOne({ userId }).exec();
     }
+    generateReferralCode() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < 8; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return code;
+    }
+    async findByReferralCode(referralCode) {
+        return this.userModel.findOne({ referralCode }).exec();
+    }
     async create(userData) {
-        const newUser = new this.userModel(userData);
-        return newUser.save();
+        let referralCode = userData.referralCode;
+        if (referralCode) {
+            const referrer = await this.findByReferralCode(referralCode);
+            if (!referrer) {
+                throw new common_1.BadRequestException('Invalid referral code');
+            }
+        }
+        const newUser = new this.userModel({
+            ...userData,
+            referralCode: this.generateReferralCode(),
+        });
+        const savedUser = await newUser.save();
+        if (referralCode) {
+            const referrer = await this.findByReferralCode(referralCode);
+            if (referrer) {
+                await this.userModel.findByIdAndUpdate(referrer._id, { $push: { referrals: savedUser._id } }, { new: true });
+                await this.userModel.findByIdAndUpdate(savedUser._id, { referredBy: referrer._id }, { new: true });
+            }
+        }
+        return savedUser;
     }
     async markEmailAsVerified(userId) {
         const user = await this.findById(userId);
@@ -83,6 +112,21 @@ let UserService = class UserService {
             throw new common_1.NotFoundException(`User with ID ${userId} not found`);
         }
         return this.userModel.findOneAndDelete({ userId }).exec();
+    }
+    async getReferralStats(userId) {
+        const user = await this.findById(userId);
+        if (!user) {
+            throw new common_1.NotFoundException('User not found');
+        }
+        const [referredUsers, referredBy] = await Promise.all([
+            this.userModel.find({ referredBy: user._id }).select('-password').exec(),
+            user.referredBy ? this.userModel.findById(user.referredBy).select('-password').exec() : null,
+        ]);
+        return {
+            totalReferrals: referredUsers.length,
+            referredUsers,
+            referredBy,
+        };
     }
 };
 exports.UserService = UserService;

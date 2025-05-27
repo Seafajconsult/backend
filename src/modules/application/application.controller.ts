@@ -123,6 +123,26 @@ export class ApplicationController {
     return this.applicationService.addDocument(id, documentId);
   }
 
+  @Post(":id/accept-offer")
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.STUDENT)
+  @ApiOperation({ summary: "Accept an offer for an application" })
+  async acceptOffer(@Param("id") id: string, @Request() req: RequestWithUser) {
+    return this.applicationService.acceptOffer(id, req.user.userId);
+  }
+
+  @Post(":id/reject-offer")
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.STUDENT)
+  @ApiOperation({ summary: "Reject an offer for an application" })
+  async rejectOffer(
+    @Param("id") id: string,
+    @Body() body: { reason?: string },
+    @Request() req: RequestWithUser
+  ) {
+    return this.applicationService.rejectOffer(id, req.user.userId, body.reason);
+  }
+
   @Delete(":id")
   @ApiOperation({ summary: "Delete an application" })
   async delete(@Param("id") id: string, @Request() req: RequestWithUser) {

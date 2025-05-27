@@ -15,6 +15,13 @@ import { StudentModule } from "./modules/student/student.module";
 import { EmployerModule } from "./modules/employer/employer.module";
 import { AdminModule } from "./modules/admin/admin.module";
 import { SuperAdminModule } from "./modules/super-admin/super-admin.module";
+import { JobModule } from "./modules/job/job.module";
+import { RecruitmentModule } from "./modules/recruitment/recruitment.module";
+import { InvoiceModule } from "./modules/invoice/invoice.module";
+import { ReferralModule } from "./modules/referral/referral.module";
+import { TermsModule } from "./modules/terms/terms.module";
+import { SMSModule } from "./modules/sms/sms.module";
+import { AnalyticsModule } from "./modules/analytics/analytics.module";
 
 @Module({
   imports: [
@@ -43,6 +50,13 @@ import { SuperAdminModule } from "./modules/super-admin/super-admin.module";
     EmployerModule,
     AdminModule,
     SuperAdminModule,
+    JobModule,
+    RecruitmentModule,
+    InvoiceModule,
+    ReferralModule,
+    TermsModule,
+    SMSModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}

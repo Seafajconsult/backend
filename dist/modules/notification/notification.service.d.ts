@@ -1,6 +1,19 @@
-import { Model } from "mongoose";
-import { Notification, NotificationType } from "./notification.schema";
-import { Server } from "socket.io";
+import { Model } from 'mongoose';
+import { Notification, NotificationType } from './notification.schema';
+import { EmailService } from '../email/email.service';
+import { ConfigService } from '@nestjs/config';
+import { UserService } from '../user/user.service';
+import { RealtimeGateway } from './realtime.gateway';
+export declare class NotificationService {
+    private notificationModel;
+    private readonly emailService;
+    private readonly configService;
+    private readonly userService;
+    private readonly realtimeGateway;
+    private readonly logger;
+    private readonly twilioClient;
+    constructor(notificationModel: Model<Notification>, emailService: EmailService, configService: ConfigService, userService: UserService, realtimeGateway: RealtimeGateway);
+}
 export declare class NotificationService {
     private notificationModel;
     server: Server;
@@ -57,5 +70,15 @@ export declare class NotificationService {
         data: Record<string, any>;
         link: string;
         createdAt: Date;
+    }>;
+    notifyNewReferral(referrerId: string, referredUser: any): Promise<import("mongoose").Document<unknown, {}, Notification, {}> & Notification & Required<{
+        _id: unknown;
+    }> & {
+        __v: number;
+    }>;
+    notifyReferralBonus(userId: string, amount: number): Promise<import("mongoose").Document<unknown, {}, Notification, {}> & Notification & Required<{
+        _id: unknown;
+    }> & {
+        __v: number;
     }>;
 }

@@ -3,17 +3,55 @@ import { Document } from "mongoose";
 import * as mongoose from "mongoose";
 
 export enum DocumentType {
+  // Identity Documents
   PASSPORT = "passport",
+  NATIONAL_ID = "national_id",
+  BIRTH_CERTIFICATE = "birth_certificate",
+
+  // Academic Documents
   TRANSCRIPT = "transcript",
-  TEST_SCORE = "test_score",
+  DEGREE_CERTIFICATE = "degree_certificate",
+  PROVISIONAL_CERTIFICATE = "provisional_certificate",
+  
+  // Test Scores
+  ENGLISH_TEST = "english_test", // IELTS, TOEFL, etc.
+  OTHER_TEST = "other_test", // GRE, GMAT, etc.
+  
+  // Financial Documents
+  BANK_STATEMENT = "bank_statement",
+  SPONSORSHIP_LETTER = "sponsorship_letter",
+  SCHOLARSHIP_LETTER = "scholarship_letter",
+  
+  // Visa Documents
+  VISA_APPLICATION = "visa_application",
+  PREVIOUS_VISA = "previous_visa",
+  
+  // Employment Documents
+  RESUME = "resume",
+  RECOMMENDATION_LETTER = "recommendation_letter",
+  WORK_EXPERIENCE = "work_experience",
+  
+  // Application Documents
+  STATEMENT_OF_PURPOSE = "statement_of_purpose",
   OFFER_LETTER = "offer_letter",
-  OTHER = "other",
+  ACCEPTANCE_LETTER = "acceptance_letter",
+  
+  // Business Documents (for employers)
+  BUSINESS_REGISTRATION = "business_registration",
+  TAX_CERTIFICATE = "tax_certificate",
+  
+  // Other
+  PHOTOGRAPH = "photograph",
+  OTHER = "other"
 }
 
 export enum DocumentStatus {
   PENDING = "pending",
+  UNDER_REVIEW = "under_review",
   APPROVED = "approved",
   REJECTED = "rejected",
+  EXPIRED = "expired",
+  REQUIRES_UPDATE = "requires_update"
 }
 
 @Schema({ timestamps: true })

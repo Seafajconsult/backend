@@ -23,20 +23,16 @@ export class CreatePaymentDto {
   @ApiProperty({
     description: "Currency code",
     example: "NGN",
-    required: false,
   })
-  @IsOptional()
   @IsString()
-  currency?: string;
+  currency: string;
 
   @ApiProperty({
     description: "Description of the payment",
-    example: "Application fee for university admission",
-    required: false,
+    example: "Application fee for University of Oxford",
   })
-  @IsOptional()
   @IsString()
-  description?: string;
+  description: string;
 
   @ApiProperty({
     description: "ID of the related application",
@@ -46,4 +42,34 @@ export class CreatePaymentDto {
   @IsOptional()
   @IsMongoId()
   applicationId?: string;
+
+  @ApiProperty({
+    description: "Payment method",
+    example: "card",
+    enum: ["card", "bank_transfer", "ussd"],
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  paymentMethod?: string;
+
+  @ApiProperty({
+    description: "Client payment reference",
+    example: "REF123456",
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  clientReference?: string;
+
+  @ApiProperty({
+    description: "Additional payment metadata",
+    example: {
+      customerEmail: "student@example.com",
+      customerPhone: "+2341234567890"
+    },
+    required: false,
+  })
+  @IsOptional()
+  metadata?: Record<string, any>;
 }

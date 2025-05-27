@@ -11,14 +11,39 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationService = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const notification_schema_1 = require("./notification.schema");
-const websockets_1 = require("@nestjs/websockets");
-const socket_io_1 = require("socket.io");
+const email_service_1 = require("../email/email.service");
+const config_1 = require("@nestjs/config");
+const user_service_1 = require("../user/user.service");
+const realtime_gateway_1 = require("./realtime.gateway");
+const twilio = require("twilio");
+let NotificationService = class NotificationService {
+    constructor(notificationModel, emailService, configService, userService, realtimeGateway) {
+        this.notificationModel = notificationModel;
+        this.emailService = emailService;
+        this.configService = configService;
+        this.userService = userService;
+        this.realtimeGateway = realtimeGateway;
+        this.logger = new common_1.Logger(NotificationService.name);
+        this.twilioClient = twilio(this.configService.get('TWILIO_ACCOUNT_SID'), this.configService.get('TWILIO_AUTH_TOKEN'));
+    }
+};
+exports.NotificationService = NotificationService;
+exports.NotificationService = NotificationService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, mongoose_1.InjectModel)(notification_schema_1.Notification.name)),
+    __metadata("design:paramtypes", [mongoose_2.Model,
+        email_service_1.EmailService,
+        config_1.ConfigService,
+        user_service_1.UserService,
+        realtime_gateway_1.RealtimeGateway])
+], NotificationService);
 let NotificationService = class NotificationService {
     constructor(notificationModel) {
         this.notificationModel = notificationModel;
@@ -77,19 +102,37 @@ let NotificationService = class NotificationService {
     async notifyNewUserRegistration(userId, email, role) {
         return this.notifySuperAdmins('New User Registration', `A new user (${email}) has registered as a ${role.toLowerCase()}.`, notification_schema_1.NotificationType.SYSTEM, { userId, email, role }, `/admin/users/${userId}`);
     }
+    async notifyNewReferral(referrerId, referredUser) {
+        return this.createNotification({
+            userId: referrerId,
+            title: 'New Referral Registration',
+            message: `${referredUser.email} has registered using your referral code!`,
+            type: notification_schema_1.NotificationType.NEW_REFERRAL,
+            data: {
+                referredUserId: referredUser.userId,
+                referredUserEmail: referredUser.email,
+            },
+            link: '/dashboard/referrals'
+        });
+    }
+    async notifyReferralBonus(userId, amount) {
+        return this.createNotification({
+            userId,
+            title: 'Referral Bonus Earned',
+            message: `You've earned a referral bonus of ${amount} for your successful referral!`,
+            type: notification_schema_1.NotificationType.REFERRAL_BONUS,
+            data: {
+                bonusAmount: amount,
+            }
+        });
+    }
 };
 exports.NotificationService = NotificationService;
 __decorate([
-    (0, websockets_1.WebSocketServer)(),
-    __metadata("design:type", socket_io_1.Server)
+    WebSocketServer(),
+    __metadata("design:type", typeof (_a = typeof Server !== "undefined" && Server) === "function" ? _a : Object)
 ], NotificationService.prototype, "server", void 0);
 exports.NotificationService = NotificationService = __decorate([
-    (0, websockets_1.WebSocketGateway)({
-        cors: {
-            origin: process.env.FRONTEND_URL,
-            credentials: true,
-        },
-    }),
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(notification_schema_1.Notification.name)),
     __metadata("design:paramtypes", [mongoose_2.Model])

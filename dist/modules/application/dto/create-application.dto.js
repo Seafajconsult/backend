@@ -10,27 +10,107 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateApplicationDto = void 0;
-const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
+class AcademicDetailsDto {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Bachelor of Science' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AcademicDetailsDto.prototype, "highestQualification", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'University of Lagos' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AcademicDetailsDto.prototype, "institution", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 2024 }),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], AcademicDetailsDto.prototype, "graduationYear", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 3.8 }),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], AcademicDetailsDto.prototype, "cgpa", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: {
+            type: 'IELTS',
+            score: 7.5,
+            dateOfTest: '2024-12-01'
+        },
+        required: false
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => EnglishTestDto),
+    __metadata("design:type", EnglishTestDto)
+], AcademicDetailsDto.prototype, "englishTest", void 0);
+class EnglishTestDto {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'IELTS' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], EnglishTestDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 7.5 }),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], EnglishTestDto.prototype, "score", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '2024-12-01' }),
+    (0, class_transformer_1.Type)(() => Date),
+    (0, class_validator_1.IsDate)(),
+    __metadata("design:type", Date)
+], EnglishTestDto.prototype, "dateOfTest", void 0);
 class CreateApplicationDto {
 }
 exports.CreateApplicationDto = CreateApplicationDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({
-        description: "ID of the employer",
-        example: "60d21b4667d0d8992e610c85",
-    }),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsMongoId)(),
-    __metadata("design:type", String)
-], CreateApplicationDto.prototype, "employerId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: "Position being applied for",
-        example: "Software Engineer Intern",
-    }),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({ example: 'Computer Science' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateApplicationDto.prototype, "position", void 0);
+], CreateApplicationDto.prototype, "course", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'University of Oxford' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateApplicationDto.prototype, "university", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'United Kingdom' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateApplicationDto.prototype, "country", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Fall 2025' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateApplicationDto.prototype, "intake", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => AcademicDetailsDto),
+    __metadata("design:type", AcademicDetailsDto)
+], CreateApplicationDto.prototype, "academicDetails", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: [String],
+        example: ['60d21b4667d0d8992e610c85'],
+        required: false
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsMongoId)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateApplicationDto.prototype, "documents", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateApplicationDto.prototype, "additionalInformation", void 0);
 //# sourceMappingURL=create-application.dto.js.map

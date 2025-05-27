@@ -18,11 +18,20 @@ var ApplicationStatus;
     ApplicationStatus["DRAFT"] = "draft";
     ApplicationStatus["SUBMITTED"] = "submitted";
     ApplicationStatus["DOCUMENT_REVIEW"] = "document_review";
+    ApplicationStatus["DOCUMENTS_APPROVED"] = "documents_approved";
+    ApplicationStatus["DOCUMENTS_REJECTED"] = "documents_rejected";
+    ApplicationStatus["SENT_TO_SCHOOL"] = "sent_to_school";
+    ApplicationStatus["SCHOOL_REVIEWING"] = "school_reviewing";
+    ApplicationStatus["ADDITIONAL_DOCS_REQUIRED"] = "additional_docs_required";
     ApplicationStatus["INTERVIEW_SCHEDULED"] = "interview_scheduled";
     ApplicationStatus["INTERVIEW_COMPLETED"] = "interview_completed";
-    ApplicationStatus["OFFER_PENDING"] = "offer_pending";
+    ApplicationStatus["OFFER_RECEIVED"] = "offer_received";
     ApplicationStatus["OFFER_ACCEPTED"] = "offer_accepted";
     ApplicationStatus["OFFER_REJECTED"] = "offer_rejected";
+    ApplicationStatus["VISA_PROCESSING"] = "visa_processing";
+    ApplicationStatus["VISA_APPROVED"] = "visa_approved";
+    ApplicationStatus["VISA_REJECTED"] = "visa_rejected";
+    ApplicationStatus["PRE_DEPARTURE"] = "pre_departure";
     ApplicationStatus["COMPLETED"] = "completed";
     ApplicationStatus["CANCELLED"] = "cancelled";
 })(ApplicationStatus || (exports.ApplicationStatus = ApplicationStatus = {}));
@@ -34,13 +43,29 @@ __decorate([
     __metadata("design:type", String)
 ], Application.prototype, "studentId", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }),
+    (0, mongoose_1.Prop)({ required: true, unique: true }),
+    __metadata("design:type", String)
+], Application.prototype, "applicationId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose.Schema.Types.ObjectId, ref: "User" }),
     __metadata("design:type", String)
 ], Application.prototype, "employerId", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
-], Application.prototype, "position", void 0);
+], Application.prototype, "course", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Application.prototype, "university", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Application.prototype, "country", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Application.prototype, "intake", void 0);
 __decorate([
     (0, mongoose_1.Prop)({
         required: true,
@@ -54,21 +79,33 @@ __decorate([
     __metadata("design:type", Array)
 ], Application.prototype, "documents", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: Date }),
-    __metadata("design:type", Date)
-], Application.prototype, "interviewDate", void 0);
+    (0, mongoose_1.Prop)({ type: Object }),
+    __metadata("design:type", Object)
+], Application.prototype, "academicDetails", void 0);
 __decorate([
-    (0, mongoose_1.Prop)(),
-    __metadata("design:type", String)
-], Application.prototype, "interviewNotes", void 0);
+    (0, mongoose_1.Prop)({ type: Object }),
+    __metadata("design:type", Object)
+], Application.prototype, "visaDetails", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ type: Object }),
     __metadata("design:type", Object)
 ], Application.prototype, "offerDetails", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: [String] }),
+    (0, mongoose_1.Prop)({ type: Object }),
+    __metadata("design:type", Object)
+], Application.prototype, "preDepartureDetails", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose.Schema.Types.ObjectId, ref: "User" }),
+    __metadata("design:type", String)
+], Application.prototype, "assignedAdvisor", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: [{ date: Date, status: String, note: String }] }),
     __metadata("design:type", Array)
 ], Application.prototype, "statusHistory", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Object }),
+    __metadata("design:type", Object)
+], Application.prototype, "metadata", void 0);
 exports.Application = Application = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Application);

@@ -35,26 +35,10 @@ export declare class SuperAdminController {
         conversation: import("../message/conversation.schema").Conversation;
         messages: import("../message/message.schema").Message[];
     }>;
-    getNotifications(req: RequestWithUser): Promise<{
-        notifications: (import("mongoose").Document<unknown, {}, import("../notification/notification.schema").Notification, {}> & import("../notification/notification.schema").Notification & Required<{
-            _id: unknown;
-        }> & {
-            __v: number;
-        })[];
-        pagination: {
-            total: number;
-            page: number;
-            limit: number;
-            pages: number;
-        };
-    }>;
+    getNotifications(req: RequestWithUser): Promise<any>;
     getUnreadCount(req: RequestWithUser): Promise<{
-        count: number;
+        count: any;
     }>;
-    markNotificationAsRead(id: string): Promise<import("mongoose").Document<unknown, {}, import("../notification/notification.schema").Notification, {}> & import("../notification/notification.schema").Notification & Required<{
-        _id: unknown;
-    }> & {
-        __v: number;
-    }>;
-    markAllNotificationsAsRead(req: RequestWithUser): Promise<import("mongoose").UpdateWriteOpResult>;
+    markNotificationAsRead(id: string): Promise<any>;
+    markAllNotificationsAsRead(req: RequestWithUser): Promise<any>;
 }

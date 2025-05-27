@@ -7,6 +7,8 @@ export declare class UserService {
     generateUniqueUserId(): Promise<string>;
     findByEmail(email: string): Promise<User | null>;
     findById(userId: string): Promise<User | null>;
+    private generateReferralCode;
+    findByReferralCode(referralCode: string): Promise<User | null>;
     create(userData: {
         email: string;
         password: string;
@@ -15,6 +17,7 @@ export declare class UserService {
         isEmailVerified?: boolean;
         firstName?: string;
         lastName?: string;
+        referralCode?: string;
     }): Promise<User>;
     markEmailAsVerified(userId: string): Promise<User>;
     updatePassword(userId: string, newPassword: string): Promise<User>;
@@ -24,4 +27,9 @@ export declare class UserService {
     countByRole(role: UserRole): Promise<number>;
     update(userId: string, updateUserDto: UpdateUserDto): Promise<User>;
     delete(userId: string): Promise<User>;
+    getReferralStats(userId: string): Promise<{
+        totalReferrals: number;
+        referredUsers: User[];
+        referredBy?: User;
+    }>;
 }

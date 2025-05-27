@@ -30,7 +30,7 @@ export class CreateNotificationDto {
   @ApiProperty({
     enum: NotificationType,
     description: "Type of notification",
-    example: NotificationType.DOCUMENT_STATUS,
+    example: NotificationType.DOCUMENT_VERIFIED,
   })
   @IsNotEmpty()
   @IsEnum(NotificationType)

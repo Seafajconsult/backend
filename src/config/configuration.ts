@@ -11,6 +11,11 @@ export default () => ({
       refreshExpiration: process.env.JWT_REFRESH_EXPIRATION || '7d',
       invitationSecret: process.env.JWT_SECRET, // Using the same secret for simplicity
     },
+    referral: {
+      bonusAmount: parseInt(process.env.REFERRAL_BONUS_AMOUNT, 10) || 50,
+      maxReferrals: parseInt(process.env.MAX_REFERRALS_PER_USER, 10) || 10,
+      bonusEnabled: process.env.REFERRAL_BONUS_ENABLED === 'true',
+    },
   },
   database: {
     uri: process.env.DATABASE_URI,

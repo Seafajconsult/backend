@@ -11,6 +11,11 @@ declare const _default: () => {
             refreshExpiration: string;
             invitationSecret: string;
         };
+        referral: {
+            bonusAmount: number;
+            maxReferrals: number;
+            bonusEnabled: boolean;
+        };
     };
     database: {
         uri: string;

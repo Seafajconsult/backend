@@ -21,6 +21,10 @@ import {
 import { Message } from "../message/message.schema";
 import { UserDocument } from "../document/document.schema";
 import { User } from "../user/user.schema";
+import { Job, JobApplication } from "../job/job.schema";
+import { RecruitmentRequest, RecruitmentCandidate } from "../recruitment/recruitment.schema";
+import { Invoice } from "../invoice/invoice.schema";
+import { Referral, ReferralReward } from "../referral/referral.schema";
 import * as PDFDocument from "pdfkit";
 import { Parser } from "json2csv";
 
@@ -33,6 +37,13 @@ export class AnalyticsService {
     @InjectModel(Message.name) private messageModel: Model<Message>,
     @InjectModel(UserDocument.name) private documentModel: Model<UserDocument>,
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Job.name) private jobModel: Model<Job>,
+    @InjectModel(JobApplication.name) private jobApplicationModel: Model<JobApplication>,
+    @InjectModel(RecruitmentRequest.name) private recruitmentRequestModel: Model<RecruitmentRequest>,
+    @InjectModel(RecruitmentCandidate.name) private recruitmentCandidateModel: Model<RecruitmentCandidate>,
+    @InjectModel(Invoice.name) private invoiceModel: Model<Invoice>,
+    @InjectModel(Referral.name) private referralModel: Model<Referral>,
+    @InjectModel(ReferralReward.name) private referralRewardModel: Model<ReferralReward>,
   ) {}
 
   async generateCustomReport(reportQuery: ReportQueryDto) {
@@ -373,5 +384,373 @@ export class AnalyticsService {
     }, 0);
 
     return totalTime / documents.length / (1000 * 60 * 60); // Convert to hours
+  }
+
+  // Enhanced Analytics Methods for New Features
+
+  async getJobMetrics(startDate?: string, endDate?: string) {
+    const dateFilter = this.buildDateFilter(startDate, endDate);
+
+    const [
+      totalJobs,
+      activeJobs,
+      totalApplications,
+      jobsByType,
+      topEmployers,
+      applicationsByStatus,
+    ] = await Promise.all([
+      this.jobModel.countDocuments(dateFilter),
+      this.jobModel.countDocuments({ ...dateFilter, status: 'active' }),
+      this.jobApplicationModel.countDocuments(dateFilter),
+      this.getJobsByType(dateFilter),
+      this.getTopEmployers(dateFilter),
+      this.getJobApplicationsByStatus(dateFilter),
+    ]);
+
+    return {
+      totalJobs,
+      activeJobs,
+      totalApplications,
+      jobsByType,
+      topEmployers,
+      applicationsByStatus,
+      averageApplicationsPerJob: totalJobs > 0 ? totalApplications / totalJobs : 0,
+    };
+  }
+
+  async getRecruitmentMetrics(startDate?: string, endDate?: string) {
+    const dateFilter = this.buildDateFilter(startDate, endDate);
+
+    const [
+      totalRequests,
+      requestsByStatus,
+      requestsByServiceType,
+      totalCandidates,
+      candidatesByStatus,
+      averageTimeToFill,
+    ] = await Promise.all([
+      this.recruitmentRequestModel.countDocuments(dateFilter),
+      this.getRecruitmentRequestsByStatus(dateFilter),
+      this.getRecruitmentRequestsByServiceType(dateFilter),
+      this.recruitmentCandidateModel.countDocuments(dateFilter),
+      this.getRecruitmentCandidatesByStatus(dateFilter),
+      this.calculateAverageTimeToFill(dateFilter),
+    ]);
+
+    return {
+      totalRequests,
+      requestsByStatus,
+      requestsByServiceType,
+      totalCandidates,
+      candidatesByStatus,
+      averageTimeToFill,
+      averageCandidatesPerRequest: totalRequests > 0 ? totalCandidates / totalRequests : 0,
+    };
+  }
+
+  async getInvoiceMetrics(startDate?: string, endDate?: string) {
+    const dateFilter = this.buildDateFilter(startDate, endDate);
+
+    const [
+      totalInvoices,
+      invoicesByStatus,
+      invoicesByType,
+      totalAmount,
+      paidAmount,
+      averageInvoiceValue,
+    ] = await Promise.all([
+      this.invoiceModel.countDocuments(dateFilter),
+      this.getInvoicesByStatus(dateFilter),
+      this.getInvoicesByType(dateFilter),
+      this.getTotalInvoiceAmount(dateFilter),
+      this.getPaidInvoiceAmount(dateFilter),
+      this.getAverageInvoiceValue(dateFilter),
+    ]);
+
+    return {
+      totalInvoices,
+      invoicesByStatus,
+      invoicesByType,
+      totalAmount,
+      paidAmount,
+      outstandingAmount: totalAmount - paidAmount,
+      averageInvoiceValue,
+      paymentRate: totalAmount > 0 ? (paidAmount / totalAmount) * 100 : 0,
+    };
+  }
+
+  async getReferralMetrics(startDate?: string, endDate?: string) {
+    const dateFilter = this.buildDateFilter(startDate, endDate);
+
+    const [
+      totalReferrals,
+      referralsByStatus,
+      totalRewards,
+      rewardsByStatus,
+      totalRewardValue,
+      paidRewardValue,
+      topReferrers,
+    ] = await Promise.all([
+      this.referralModel.countDocuments(dateFilter),
+      this.getReferralsByStatus(dateFilter),
+      this.referralRewardModel.countDocuments(dateFilter),
+      this.getRewardsByStatus(dateFilter),
+      this.getTotalRewardValue(dateFilter),
+      this.getPaidRewardValue(dateFilter),
+      this.getTopReferrers(dateFilter),
+    ]);
+
+    return {
+      totalReferrals,
+      referralsByStatus,
+      totalRewards,
+      rewardsByStatus,
+      totalRewardValue,
+      paidRewardValue,
+      pendingRewardValue: totalRewardValue - paidRewardValue,
+      topReferrers,
+      conversionRate: totalReferrals > 0 ? (referralsByStatus.qualified || 0) / totalReferrals * 100 : 0,
+    };
+  }
+
+  async getComprehensiveDashboard() {
+    const [
+      userMetrics,
+      applicationMetrics,
+      jobMetrics,
+      recruitmentMetrics,
+      invoiceMetrics,
+      referralMetrics,
+      recentActivity,
+    ] = await Promise.all([
+      this.getUserMetrics(),
+      this.getApplicationMetrics(),
+      this.getJobMetrics(),
+      this.getRecruitmentMetrics(),
+      this.getInvoiceMetrics(),
+      this.getReferralMetrics(),
+      this.getRecentActivity(),
+    ]);
+
+    return {
+      userMetrics,
+      applicationMetrics,
+      jobMetrics,
+      recruitmentMetrics,
+      invoiceMetrics,
+      referralMetrics,
+      recentActivity,
+      lastUpdated: new Date(),
+    };
+  }
+
+  // Helper methods
+  private buildDateFilter(startDate?: string, endDate?: string) {
+    const filter: any = {};
+    if (startDate || endDate) {
+      filter.createdAt = {};
+      if (startDate) filter.createdAt.$gte = new Date(startDate);
+      if (endDate) filter.createdAt.$lte = new Date(endDate);
+    }
+    return filter;
+  }
+
+  private async getUserMetrics() {
+    const [totalUsers, usersByRole, recentUsers] = await Promise.all([
+      this.userModel.countDocuments(),
+      this.getUsersByRole(),
+      this.userModel.countDocuments({
+        createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
+      }),
+    ]);
+
+    return {
+      totalUsers,
+      usersByRole,
+      recentUsers,
+    };
+  }
+
+  private async getUsersByRole() {
+    return this.userModel.aggregate([
+      { $group: { _id: '$role', count: { $sum: 1 } } },
+      { $project: { role: '$_id', count: 1, _id: 0 } }
+    ]);
+  }
+
+  private async getJobsByType(dateFilter: any) {
+    return this.jobModel.aggregate([
+      { $match: dateFilter },
+      { $group: { _id: '$jobType', count: { $sum: 1 } } },
+      { $project: { type: '$_id', count: 1, _id: 0 } }
+    ]);
+  }
+
+  private async getTopEmployers(dateFilter: any) {
+    return this.jobModel.aggregate([
+      { $match: dateFilter },
+      { $group: { _id: '$employerId', jobCount: { $sum: 1 } } },
+      { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'employer' } },
+      { $unwind: '$employer' },
+      { $project: { employerName: '$employer.email', jobCount: 1 } },
+      { $sort: { jobCount: -1 } },
+      { $limit: 10 }
+    ]);
+  }
+
+  private async getJobApplicationsByStatus(dateFilter: any) {
+    return this.jobApplicationModel.aggregate([
+      { $match: dateFilter },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+      { $project: { status: '$_id', count: 1, _id: 0 } }
+    ]);
+  }
+
+  private async getRecentActivity() {
+    const recentDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const [
+      recentApplications,
+      recentJobs,
+      recentRecruitmentRequests,
+      recentInvoices,
+    ] = await Promise.all([
+      this.applicationModel.countDocuments({ createdAt: { $gte: recentDate } }),
+      this.jobModel.countDocuments({ createdAt: { $gte: recentDate } }),
+      this.recruitmentRequestModel.countDocuments({ createdAt: { $gte: recentDate } }),
+      this.invoiceModel.countDocuments({ createdAt: { $gte: recentDate } }),
+    ]);
+
+    return {
+      recentApplications,
+      recentJobs,
+      recentRecruitmentRequests,
+      recentInvoices,
+    };
+  }
+
+  // Additional helper methods for new analytics
+  private async getRecruitmentRequestsByStatus(dateFilter: any) {
+    return this.recruitmentRequestModel.aggregate([
+      { $match: dateFilter },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+      { $project: { status: '$_id', count: 1, _id: 0 } }
+    ]);
+  }
+
+  private async getRecruitmentRequestsByServiceType(dateFilter: any) {
+    return this.recruitmentRequestModel.aggregate([
+      { $match: dateFilter },
+      { $group: { _id: '$serviceType', count: { $sum: 1 } } },
+      { $project: { serviceType: '$_id', count: 1, _id: 0 } }
+    ]);
+  }
+
+  private async getRecruitmentCandidatesByStatus(dateFilter: any) {
+    return this.recruitmentCandidateModel.aggregate([
+      { $match: dateFilter },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+      { $project: { status: '$_id', count: 1, _id: 0 } }
+    ]);
+  }
+
+  private async calculateAverageTimeToFill(dateFilter: any): Promise<number> {
+    const completedRequests = await this.recruitmentRequestModel.find({
+      ...dateFilter,
+      status: 'completed'
+    });
+
+    if (completedRequests.length === 0) return 0;
+
+    const totalTime = completedRequests.reduce((sum, request) => {
+      const requestWithTimestamps = request as unknown as TimestampedDocument;
+      return sum + (requestWithTimestamps.updatedAt.getTime() - requestWithTimestamps.createdAt.getTime());
+    }, 0);
+
+    return totalTime / completedRequests.length / (1000 * 60 * 60 * 24); // Convert to days
+  }
+
+  private async getInvoicesByStatus(dateFilter: any) {
+    return this.invoiceModel.aggregate([
+      { $match: dateFilter },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+      { $project: { status: '$_id', count: 1, _id: 0 } }
+    ]);
+  }
+
+  private async getInvoicesByType(dateFilter: any) {
+    return this.invoiceModel.aggregate([
+      { $match: dateFilter },
+      { $group: { _id: '$invoiceType', count: { $sum: 1 } } },
+      { $project: { type: '$_id', count: 1, _id: 0 } }
+    ]);
+  }
+
+  private async getTotalInvoiceAmount(dateFilter: any): Promise<number> {
+    const result = await this.invoiceModel.aggregate([
+      { $match: dateFilter },
+      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+    ]);
+    return result[0]?.total || 0;
+  }
+
+  private async getPaidInvoiceAmount(dateFilter: any): Promise<number> {
+    const result = await this.invoiceModel.aggregate([
+      { $match: { ...dateFilter, status: 'paid' } },
+      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+    ]);
+    return result[0]?.total || 0;
+  }
+
+  private async getAverageInvoiceValue(dateFilter: any): Promise<number> {
+    const result = await this.invoiceModel.aggregate([
+      { $match: dateFilter },
+      { $group: { _id: null, average: { $avg: '$totalAmount' } } }
+    ]);
+    return result[0]?.average || 0;
+  }
+
+  private async getReferralsByStatus(dateFilter: any) {
+    return this.referralModel.aggregate([
+      { $match: dateFilter },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+      { $project: { status: '$_id', count: 1, _id: 0 } }
+    ]);
+  }
+
+  private async getRewardsByStatus(dateFilter: any) {
+    return this.referralRewardModel.aggregate([
+      { $match: dateFilter },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+      { $project: { status: '$_id', count: 1, _id: 0 } }
+    ]);
+  }
+
+  private async getTotalRewardValue(dateFilter: any): Promise<number> {
+    const result = await this.referralRewardModel.aggregate([
+      { $match: dateFilter },
+      { $group: { _id: null, total: { $sum: '$rewardValue' } } }
+    ]);
+    return result[0]?.total || 0;
+  }
+
+  private async getPaidRewardValue(dateFilter: any): Promise<number> {
+    const result = await this.referralRewardModel.aggregate([
+      { $match: { ...dateFilter, status: 'paid' } },
+      { $group: { _id: null, total: { $sum: '$rewardValue' } } }
+    ]);
+    return result[0]?.total || 0;
+  }
+
+  private async getTopReferrers(dateFilter: any) {
+    return this.referralModel.aggregate([
+      { $match: dateFilter },
+      { $group: { _id: '$referrerId', referralCount: { $sum: 1 } } },
+      { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'referrer' } },
+      { $unwind: '$referrer' },
+      { $project: { referrerName: '$referrer.email', referralCount: 1 } },
+      { $sort: { referralCount: -1 } },
+      { $limit: 10 }
+    ]);
   }
 }

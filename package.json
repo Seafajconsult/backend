@@ -2,6 +2,7 @@
   "name": "sea-faj-backend",
   "version": "0.1.0",
   "description": "Backend for SEA-FAJ Student & Employer Platform",
+  "Author": "Samuel Owase"
   "private": true,
   "scripts": {
     "prebuild": "rimraf dist",
